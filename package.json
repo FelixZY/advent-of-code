@@ -1,0 +1,32 @@
+{
+  "name": "advent-of-code",
+  "description": "Repository for my advent of code solutions.",
+  "private": "true",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FelixZY/advent-of-code.git"
+  },
+  "license": "MIT",
+  "maintainers": [
+    {
+      "name": "Felix Zedén Yverås",
+      "email": "felix@fzy.se",
+      "url": "https://fzy.se"
+    }
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@tsconfig/recommended": "^1.0.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.4.1",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-sh": "^0.14.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
