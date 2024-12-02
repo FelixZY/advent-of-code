@@ -1,0 +1,101 @@
+diff --git a/solutions/2024/day02/rust/Cargo.toml b/solutions/2024/day02/rust/Cargo.toml
+index c061842..e996b73 100644
+--- a/solutions/2024/day02/rust/Cargo.toml
++++ b/solutions/2024/day02/rust/Cargo.toml
+@@ -6,6 +6,7 @@ edition = "2021"
+ [dependencies]
+ 
+ [dev-dependencies]
++bitvec = "1.0.1"
+ criterion = "0.5.1"
+ 
+ [[bench]]
+diff --git a/solutions/2024/day02/rust/src/report.rs b/solutions/2024/day02/rust/src/report.rs
+index 75a0248..b1bd03b 100644
+--- a/solutions/2024/day02/rust/src/report.rs
++++ b/solutions/2024/day02/rust/src/report.rs
+@@ -1,3 +1,5 @@
++use bitvec::bitvec;
++use bitvec::prelude::Msb0;
+ use std::str::FromStr;
+ 
+ pub struct Report {
+@@ -16,35 +18,62 @@ impl Report {
+         }
+     }
+ 
+-    pub fn is_safe(&self, discrepancy_threshold: usize) -> bool {
++    pub fn is_safe(&self, max_bad_levels: usize) -> bool {
+         if self.data.len() < 2 {
+             // Levels are not _increasing or decreasing_
+             return false;
+         }
+ 
+-        let mut discrepancies = 0;
++        self.get_bad_level_count() <= max_bad_levels
++    }
++
++    fn get_bad_level_count(&self) -> usize {
++        assert!(self.data.len() >= 2);
++
+         let mut prev_level = *self.data.first().unwrap();
+-        let mut is_increasing = self.data[1] - self.data[0] > 0;
++        let mut in_bounds_mask = bitvec!(usize, Msb0; 0; self.data.len());
++        // Start out assuming 1 mean increasing and 0 mean decreasing
++        let mut direction_mask = bitvec!(usize, Msb0; 0; self.data.len());
++
++        // Assume the first measurement is in bounds
++        in_bounds_mask.set(0, true);
++        // Assume the first measurement aligns with the rest
++        direction_mask.set(0, true);
+ 
+         for i in 1..self.data.len() {
+             let diff = self.data[i] - prev_level;
+ 
+-            if diff == 0 || diff.abs() > 3 {
+-                discrepancies += 1;
+-            }
+-
+-            if is_increasing && diff < 0 || !is_increasing && diff > 0 {
+-                discrepancies += 1;
+-                is_increasing = !is_increasing;
+-            }
+-
+-            if discrepancies > discrepancy_threshold {
+-                return false;
+-            }
++            in_bounds_mask.set(i, diff > 0 && diff.abs() <= 3);
++            direction_mask.set(i, diff > 0);
+ 
+             prev_level = self.data[i]
+         }
+ 
+-        true
++        // If the decrease count is actually larger than the increase count,
++        // flip the meaning of the bits.
++        if direction_mask.count_zeros() > direction_mask.count_ones() {
++            println!("direction: {:?}", direction_mask);
++            direction_mask = !direction_mask;
++            // Assume the first measurement aligns with the rest
++            direction_mask.insert(0, true);
++            println!("direction: {:?}", direction_mask);
++        }
++
++        println!("bounds: {:?}", in_bounds_mask);
++        println!("direction: {:?}", direction_mask);
++        let result = in_bounds_mask & direction_mask;
++        println!("result: {:?}", result);
++        result.count_zeros()
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use crate::report::*;
++
++    #[test]
++    fn yields_only_one_discrepancy_per_level() {
++        let report = Report::parse("1 2 -9 3");
++        assert_eq!(report.get_bad_level_count(), 1);
+     }
+ }
