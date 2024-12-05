@@ -16,20 +16,21 @@ fun main() {
         input.lineSequence().dropWhile { it.isNotBlank() }.drop(1).takeWhile { it.isNotBlank() }
             .map { it.split(',').map(String::toInt) }.toList()
 
-    val sumOfMiddle = jobs.filter { job ->
-        val remainingPageSet = job.toMutableSet()
-        val completed = mutableSetOf<Int>()
-        job.forEach { page ->
-            remainingPageSet.remove(page)
-            if (ruleSet[page]?.let {
-                    (it - completed).intersect(remainingPageSet).isEmpty()
-                } == false) {
-                return@filter false
-            }
-            completed.add(page)
-        }
-        true
-    }.sumOf { it[it.size / 2] }
 
-    println(sumOfMiddle)
+    println("Part 1: ${part1(ruleSet, jobs)}")
 }
+
+fun part1(ruleSet: Map<Int, Set<Int>>, jobs: List<List<Int>>): Int = jobs.filter { job ->
+    val remainingPageSet = job.toMutableSet()
+    val completed = mutableSetOf<Int>()
+    job.forEach { page ->
+        remainingPageSet.remove(page)
+        if (ruleSet[page]?.let {
+                (it - completed).intersect(remainingPageSet).isEmpty()
+            } == false) {
+            return@filter false
+        }
+        completed.add(page)
+    }
+    true
+}.sumOf { it[it.size / 2] }
