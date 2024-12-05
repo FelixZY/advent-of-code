@@ -18,6 +18,7 @@ fun main() {
 
 
     println("Part 1: ${part1(ruleSet, jobs)}")
+    println("Part 2: ${part2(ruleSet, jobs)}")
 }
 
 fun part1(ruleSet: Map<Int, Set<Int>>, jobs: List<List<Int>>): Int = jobs.filter { job ->
@@ -33,4 +34,39 @@ fun part1(ruleSet: Map<Int, Set<Int>>, jobs: List<List<Int>>): Int = jobs.filter
         completed.add(page)
     }
     true
+}.sumOf { it[it.size / 2] }
+
+fun part2(ruleSet: Map<Int, Set<Int>>, jobs: List<List<Int>>): Int = jobs.mapNotNull { job ->
+    val remainingPageSet = job.toMutableSet()
+    val completed = mutableSetOf<Int>()
+    var modifiedList: MutableList<Int>? = null
+
+    var i = 0
+    while (i < job.size) {
+        val pages = (modifiedList ?: job)
+
+        val page = pages[i]
+        val requiredPages = ruleSet[page]
+        if (requiredPages == null) {
+            completed.add(page)
+            i++
+            continue
+        }
+
+        val unfulfilledDependencies = (requiredPages - completed).intersect(remainingPageSet)
+        if (unfulfilledDependencies.isEmpty()) {
+            completed.add(page)
+            i++
+            continue
+        }
+
+        modifiedList = modifiedList ?: job.toMutableList()
+
+        val moveTo = pages.indexOfLast { unfulfilledDependencies.contains(it) }
+        require(moveTo > i)
+
+        modifiedList.add(moveTo, modifiedList.removeAt(i))
+    }
+
+    modifiedList
 }.sumOf { it[it.size / 2] }
