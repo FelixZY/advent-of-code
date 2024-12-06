@@ -10,8 +10,12 @@ class Guard(private var movementDirection: Direction) : WorldObject() {
             Direction.RIGHT -> '>'
         }
 
-    class Controller(guard: Guard) : se.fzy.adventofcode.Controller<Guard>(guard) {
+    class Controller(guard: Guard, position: Position) :
+        se.fzy.adventofcode.Controller<Guard>(guard) {
         private val visitedLocations: MutableSet<Position> = mutableSetOf()
+        private val trail: MutableSet<Pair<Position, Direction>> = mutableSetOf()
+        private var reVisitStart: Position = position
+        private var reVisitDirection: Direction = guard.movementDirection
 
         override fun onTick(accessor: World.Accessor) {
             val position = accessor.locate(obj)!!
@@ -24,6 +28,18 @@ class Guard(private var movementDirection: Direction) : WorldObject() {
             if (!visitedLocations.contains(position)) {
                 accessor.incStatUniqGuardLocations()
                 visitedLocations += position
+            }
+
+            if (!trail.contains(position to obj.movementDirection)) {
+                trail += position to obj.movementDirection
+                reVisitStart = position
+                reVisitDirection = obj.movementDirection
+            } else if (reVisitStart == position && reVisitDirection == obj.movementDirection) {
+                accessor.queueAction {
+                    it.notifyGuardIsLooping()
+                    it.gameOver()
+                }
+                return
             }
 
             when (obj.movementDirection) {

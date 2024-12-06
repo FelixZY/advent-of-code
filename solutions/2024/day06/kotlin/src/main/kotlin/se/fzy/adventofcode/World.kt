@@ -13,6 +13,7 @@ private constructor(
     private val accessor = Accessor()
     private val mutator = Mutator()
     private var isGameOver: Boolean = false
+    var guardIsLooping: Boolean = false
     var statisticUniqueGuardLocations = 0
         private set
 
@@ -57,6 +58,10 @@ private constructor(
 
         fun incStatUniqGuardLocations() {
             statisticUniqueGuardLocations++
+        }
+
+        fun notifyGuardIsLooping() {
+            guardIsLooping = true
         }
     }
 
@@ -103,7 +108,7 @@ private constructor(
                     else -> null
                 }?.let { toAdd ->
                     if (toAdd is Guard) {
-                        controllers.add(Guard.Controller(toAdd))
+                        controllers.add(Guard.Controller(toAdd, Position(x, y)))
                     }
                     objectsByPosition.getOrPut(Position(x, y), ::mutableListOf).add(toAdd)
                     positionByObject[toAdd] = Position(x, y)
