@@ -12,8 +12,7 @@ class Guard(private var movementDirection: Direction) : WorldObject() {
 
     class Controller(guard: Guard, position: Position) :
         se.fzy.adventofcode.Controller<Guard>(guard) {
-        private val visitedLocations: MutableSet<Position> = mutableSetOf()
-        private val trail: MutableSet<Pair<Position, Direction>> = mutableSetOf()
+        private val trail: MutableMap<Position, MutableSet<Direction>> = mutableMapOf()
         private var reVisitStart: Position = position
         private var reVisitDirection: Direction = guard.movementDirection
 
@@ -25,22 +24,24 @@ class Guard(private var movementDirection: Direction) : WorldObject() {
                 return
             }
 
-            if (!visitedLocations.contains(position)) {
-                accessor.incStatUniqGuardLocations()
-                visitedLocations += position
-            }
-
-            if (!trail.contains(position to obj.movementDirection)) {
-                trail += position to obj.movementDirection
-                reVisitStart = position
-                reVisitDirection = obj.movementDirection
-            } else if (reVisitStart == position && reVisitDirection == obj.movementDirection) {
-                accessor.queueAction {
-                    it.notifyGuardIsLooping()
-                    it.gameOver()
+            trail
+                .getOrPut(position) {
+                    accessor.incStatUniqGuardLocations()
+                    mutableSetOf()
                 }
-                return
-            }
+                .also {
+                    if (it.contains(obj.movementDirection)) {
+                        accessor.queueAction { mutator ->
+                            mutator.notifyGuardIsLooping()
+                            mutator.gameOver()
+                        }
+                        return
+                    } else {
+                        it.add(obj.movementDirection)
+                        reVisitStart = position
+                        reVisitDirection = obj.movementDirection
+                    }
+                }
 
             when (obj.movementDirection) {
                 Direction.UP ->
