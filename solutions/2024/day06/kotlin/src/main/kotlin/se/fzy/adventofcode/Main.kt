@@ -1,7 +1,11 @@
 package se.fzy.adventofcode
 
 fun main() {
-    val input = Resources.readInput("part1_sample.txt")
+    part1()
+}
+
+fun part1() {
+    val input = Resources.readInput("input.txt")
 
     val world = World.parse(input)
     var frame = 0
