@@ -15,22 +15,11 @@ class WorldTest {
             ######
         """.trimIndent()
         val world = World.parse(worldInput)
-        val frame = StringBuilder()
-        world.addRenderer {
-            for (y in 0..<it.worldHeight) {
-                for (x in 0..<it.worldWidth) {
-                    frame.append(
-                        when (val obj = it.look(Position(x, y)).singleOrNull()) {
-                            null -> '.'
-                            else -> obj.repr()
-                        },
-                    )
-                }
-                frame.append('\n')
-            }
-        }
+        var frame: String? = null
+
+        world.addRenderer(stringRenderer { frame = it })
         world.drawFrame()
 
-        expectThat(frame.toString().trim()).isEqualTo(worldInput)
+        expectThat(frame?.trim()).isEqualTo(worldInput)
     }
 }
