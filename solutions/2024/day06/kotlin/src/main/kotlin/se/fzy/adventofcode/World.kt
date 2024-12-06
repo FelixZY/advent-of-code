@@ -13,6 +13,8 @@ private constructor(
     private val accessor = Accessor()
     private val mutator = Mutator()
     private var isGameOver: Boolean = false
+    var statisticUniqueGuardLocations = 0
+        private set
 
     fun addRenderer(renderer: Renderer) {
         renderers.add(renderer)
@@ -51,6 +53,10 @@ private constructor(
 
         fun queueAction(action: Action) {
             actionQueue.add(action)
+        }
+
+        fun incStatUniqGuardLocations() {
+            statisticUniqueGuardLocations++
         }
     }
 

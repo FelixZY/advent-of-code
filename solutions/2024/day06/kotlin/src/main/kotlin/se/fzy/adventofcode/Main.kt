@@ -23,4 +23,6 @@ fun main() {
         Thread.sleep(500)
     }
     world.run()
+
+    println(world.statisticUniqueGuardLocations)
 }

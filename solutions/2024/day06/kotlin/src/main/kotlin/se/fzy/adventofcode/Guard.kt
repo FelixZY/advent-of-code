@@ -11,12 +11,19 @@ class Guard(private var movementDirection: Direction) : WorldObject() {
         }
 
     class Controller(guard: Guard) : se.fzy.adventofcode.Controller<Guard>(guard) {
+        private val visitedLocations: MutableSet<Position> = mutableSetOf()
+
         override fun onTick(accessor: World.Accessor) {
             val position = accessor.locate(obj)!!
 
             if (position.x !in 0..<accessor.worldWidth || position.y !in 0..<accessor.worldHeight) {
                 accessor.queueAction { it.gameOver() }
                 return
+            }
+
+            if (!visitedLocations.contains(position)) {
+                accessor.incStatUniqGuardLocations()
+                visitedLocations += position
             }
 
             when (obj.movementDirection) {
