@@ -11,27 +11,47 @@ fun main() {
 
     val antiNodeCount =
         antennasByFrequency
-            .mapValues { (_, antennas) -> calculateAntiNodes(antennas) }
+            .mapValues { (_, antennas) -> calculateAntiNodes(antennas, mapBounds) }
             .values
             .asSequence()
             .flatten()
             .distinct()
-            .filter { it.x >= 0 && it.y >= 0 && it.x < mapBounds.x && it.y < mapBounds.y }
             .count()
 
     println(antiNodeCount)
 }
 
-fun calculateAntiNodes(antennas: List<IntVector2d>): Sequence<IntVector2d> = sequence {
-    antennas.indices.forEach { i ->
-        for (j in i + 1..antennas.lastIndex) {
-            val betweenVector = antennas[j] - antennas[i]
+fun calculateAntiNodes(antennas: List<IntVector2d>, mapBounds: IntVector2d): Sequence<IntVector2d> =
+    sequence {
+        fun isInBounds(vector: IntVector2d): Boolean =
+            vector.x >= 0 && vector.x < mapBounds.x && vector.y >= 0 && vector.y < mapBounds.y
 
-            yield(antennas[i] - betweenVector)
-            yield(antennas[j] + betweenVector)
+        antennas.indices.forEach { i ->
+            for (j in i + 1..antennas.lastIndex) {
+                val betweenVector = antennas[j] - antennas[i]
+
+                var aInBounds = true
+                var bInBounds = true
+                for (step in 0..Int.MAX_VALUE) {
+                    if (aInBounds) {
+                        (antennas[i] - betweenVector * step)
+                            .takeIf { isInBounds(it).also { inBounds -> aInBounds = inBounds } }
+                            ?.let { yield(it) }
+                    }
+
+                    if (bInBounds) {
+                        (antennas[j] + betweenVector * step)
+                            .takeIf { isInBounds(it).also { inBounds -> bInBounds = inBounds } }
+                            ?.let { yield(it) }
+                    }
+
+                    if (!(aInBounds || bInBounds)) {
+                        break
+                    }
+                }
+            }
         }
     }
-}
 
 fun parseAntennaMap(antennaMap: String): Map<Char, List<IntVector2d>> {
     val antennasByFrequency = mutableMapOf<Char, MutableList<IntVector2d>>()
