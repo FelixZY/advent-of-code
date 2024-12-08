@@ -13,6 +13,7 @@ I like to write code in many different languages. Therefore, I'm rotating on my 
 | Language   | Solutions                                        |
 | ---------- | ------------------------------------------------ |
 | Kotlin     | <ul><li>2024<ul><li>day 1<li>day 5<li>day 6</ul> |
+| Python     | <ul><li>2024<ul><li>day 7</ul>                   |
 | Rust       | <ul><li>2024<ul><li>day 2<li>day 4</ul>          |
 | TypeScript | <ul><li>2024<ul><li>day 3</ul>                   |
 
